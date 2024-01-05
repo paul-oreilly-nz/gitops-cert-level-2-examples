@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: promotion-example
+  namespace: argocd
+spec:
+  generators:
+  - git:
+    repoURL: https://github.com/codefresh-contrib/gitops-cert-level-2-examples.git
+    revision: HEAD
+    directories:
+    - path: environment-promotion/envs/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/codefresh-contrib/gitops-cert-level-2-examples.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        syncOptions:
+        - createNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
